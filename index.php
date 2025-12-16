@@ -9,68 +9,58 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 <?php include 'includes/header.php'; ?>
 
 <div class="content-wrapper">
-
     <?php include 'includes/menu.php'; ?>
-
+    
     <main class="main-content">
-
         <!-- Page Header -->
         <div class="page-header">
             <?php
             $page_titles = array(
-                'dashboard'   => 'Dashboard',
+                'dashboard' => 'Dashboard',
                 'data_barang' => 'Data Barang',
-                'kategori'    => 'Kategori Barang',
-                'laporan'     => 'Laporan',
-                'pengaturan'  => 'Pengaturan Sistem'
+                'data_pegawai' => 'Data Pegawai',
+                'kategori' => 'Kategori Barang',
+                'laporan' => 'Laporan',
+                'pengaturan' => 'Pengaturan Sistem'
             );
             ?>
             <h2><?php echo $page_titles[$page] ?? 'Dashboard'; ?></h2>
-
             <div class="breadcrumb">
                 <a href="index.php">Home</a>
                 <i class="fas fa-chevron-right"></i>
                 <span><?php echo $page_titles[$page] ?? 'Dashboard'; ?></span>
             </div>
         </div>
-
+        
         <!-- Konten Utama -->
         <div class="content">
             <?php
             // Load konten berdasarkan halaman
-            switch ($page) {
+            switch($page) {
                 case 'dashboard':
                     include 'pages/dashboard.php';
                     break;
-
                 case 'data_barang':
                     include 'pages/data_barang.php';
                     break;
-
-                case 'pegawai':
-                    include 'pegawai/pegawai.php';
+                case 'data_pegawai':
+                    include 'pegawai/data_pegawai.php';
                     break;
-
                 case 'kategori':
                     include 'pages/kategori.php';
                     break;
-
                 case 'laporan':
                     include 'pages/laporan.php';
                     break;
-
                 case 'pengaturan':
                     include 'pages/pengaturan.php';
                     break;
-
                 default:
                     include 'pages/dashboard.php';
             }
             ?>
         </div>
-
     </main>
-
 </div>
 
 <?php include 'includes/footer.php'; ?>

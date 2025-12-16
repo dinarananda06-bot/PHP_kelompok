@@ -1,33 +1,31 @@
-<?php 
-include 'koneksidb.php'; 
+<?php
+include 'koneksi.php';
 ?>
 
 <div class="content-wrapper">
-    <main class="main-content">
+    
+    <main class="main-content">       
         <div class="content">
             <div class="card">
                 <div class="card-body">
                     <form method="POST" class="form-vertical">
-
-                        <!-- tampilkan data -->
+                        
+                        <!-- tampilkan data........... -->
                         <div class="row mt-4">
                             <div class="col-md-6 mb-4">
-
-                                <!-- Charts Stock -->
+                                <!-- Charts Stock.............................................................. -->
                                 <div class="stat-card">
                                     <div class="stat-icon" style="background-color: #FF9800;">
                                         <i class="fas fa-chart-line"></i>
                                     </div>
                                     <div class="stat-info">
-                                        <h3>Barang dengan stok dibawah 10</h3>
-                                        <?php 
-                                            $sql = "SELECT COUNT(*) as total FROM barang WHERE stok < 5";
-                                            $result = $koneksidb->query($sql);
-                                            $row = $result->fetch_assoc();
+                                        <h3>Barang dengan stok dibawah 10 </h3>
+                                        <?php
+                                        $sql = "SELECT COUNT(*) as total FROM barang where stok <5";
+                                        $result = $koneksi->query($sql);
+                                        $row = $result->fetch_assoc();
                                         ?>
-                                        <p class="stat-number">
-                                            <?php echo $row['total'] ?? 0; ?>
-                                        </p>
+                                        <p class="stat-number"><?php echo $row['total'] ?? 0; ?></p>
                                     </div>
                                 </div>
 
@@ -36,29 +34,26 @@ include 'koneksidb.php';
                                         <i class="fas fa-tags"></i>
                                     </div>
                                     <div class="stat-info">
-                                        <h3>Jumlah macam barang</h3>
-                                        <?php 
-                                            $sql = "SELECT COUNT(*) as total FROM barang";
-                                            $result = $koneksidb->query($sql);
-                                            $row = $result->fetch_assoc();
+                                        <h3>Jumlah macam barang </h3>
+                                        <?php
+                                        $sql = "SELECT COUNT(*) as total FROM barang";
+                                        $result = $koneksi->query($sql);
+                                        $row = $result->fetch_assoc();
                                         ?>
-                                        <p class="stat-number">
-                                            <?php echo $row['total']; ?>
-                                        </p>
+                                        <p class="stat-number"><?php echo $row['total']; ?></p>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
-                    </form>
-                </div>
 
-                <div class="card-header">
+                    </form>
+                
+                </div>
+                    <div class="card-header">
                     <a href="index.php?page=data_barang" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Kembali
                     </a>
-                </div>
-
+                </div>    
             </div>
         </div>
     </main>
