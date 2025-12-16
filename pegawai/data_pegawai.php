@@ -80,7 +80,7 @@
                                    onclick="return confirm('Yakin hapus data pegawai ini?')">
                                     <i class="fas fa-trash"></i>
                                 </a>
-                                <a href="#" class="btn-action btn-view" title="Detail">
+                                <a href="pegawai/deatilpg.php?id=<?php echo $row['id']; ?>" class="btn-action btn-view" title="Detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
                             </td>
