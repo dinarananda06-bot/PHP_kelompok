@@ -1,17 +1,21 @@
 <?php
-include 'koneksidb.php';
-$page_title = "Tambah Barang";  
+include 'koneksi.php';
 
-function clean_input($data){
-    global $koneksidb;
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    $data = mysqli_real_escape_string($koneksidb, $data);
-    return $data;
+// --- TAMBAHKAN FUNGSI INI DI SINI ---
+function clean_input($data) {
+    global $koneksi;
+    $data = trim($data); // Hapus spasi di awal/akhir
+    $data = stripslashes($data); // Hapus backslashes
+    $data = htmlspecialchars($data); // Ubah karakter khusus jadi HTML entities
+    // Mencegah SQL Injection
+    return mysqli_real_escape_string($koneksi, $data);
 }
+// ------------------------------------
+
+$page_title = "Tambah Barang";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Sekarang fungsi clean_input sudah bisa dikenali
     $kode_barang = clean_input($_POST['kode_barang']);
     $nama_barang = clean_input($_POST['nama_barang']);
     $kategori = clean_input($_POST['kategori']);
@@ -31,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     // Cek kode sudah ada
     $check_query = "SELECT id FROM barang WHERE kode_barang = '$kode_barang'";
-    $check_result = mysqli_query($koneksidb, $check_query);
+    $check_result = mysqli_query($koneksi, $check_query);
     
     if (mysqli_num_rows($check_result) > 0) {
         $_SESSION['pesan'] = "Kode barang sudah digunakan!";
@@ -40,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $query = "INSERT INTO barang (kode_barang, nama_barang, kategori, stok, harga, deskripsi, status) 
                   VALUES ('$kode_barang', '$nama_barang', '$kategori', '$stok', '$harga', '$deskripsi', 'aktif')";
         
-        if (mysqli_query($koneksidb, $query)) {
+        if (mysqli_query($koneksi, $query)) {
             $_SESSION['pesan'] = "Barang berhasil ditambahkan!";
             $_SESSION['tipe'] = "success";
             header("Location: index.php?page=data_barang");

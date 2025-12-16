@@ -1,5 +1,15 @@
 <?php
-include 'koneksidb.php';
+include 'koneksi.php';
+
+if (!function_exists('clean_input')) {
+    function clean_input($data) {
+        global $koneksi;
+        $data = trim($data);
+        $data = stripslashes($data);
+        $data = htmlspecialchars($data);
+        return mysqli_real_escape_string($koneksi, $data);
+    }
+}
 
 $page_title = "Edit Barang";
 
@@ -7,13 +17,13 @@ $page_title = "Edit Barang";
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 // Ambil data barang
-$query  = "SELECT * FROM barang WHERE id = $id";
-$result = mysqli_query($koneksidb, $query);
+$query = "SELECT * FROM barang WHERE id = $id";
+$result = mysqli_query($koneksi, $query);
 $barang = mysqli_fetch_assoc($result);
 
 if (!$barang) {
     $_SESSION['pesan'] = "Barang tidak ditemukan!";
-    $_SESSION['tipe']  = "error";
+    $_SESSION['tipe'] = "error";
     header("Location: index.php?page=data_barang");
     exit();
 }
@@ -21,39 +31,39 @@ if (!$barang) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $kode_barang = clean_input($_POST['kode_barang']);
     $nama_barang = clean_input($_POST['nama_barang']);
-    $kategori    = clean_input($_POST['kategori']);
-    $stok        = clean_input($_POST['stok']);
-    $harga       = clean_input($_POST['harga']);
-    $deskripsi   = clean_input($_POST['deskripsi']);
-    $status      = clean_input($_POST['status']);
-
+    $kategori = clean_input($_POST['kategori']);
+    $stok = clean_input($_POST['stok']);
+    $harga = clean_input($_POST['harga']);
+    $deskripsi = clean_input($_POST['deskripsi']);
+    $status = clean_input($_POST['status']);
+    
     // Cek kode unik (kecuali untuk barang ini)
-    $check_query  = "SELECT id FROM barang WHERE kode_barang = '$kode_barang' AND id != $id";
+    $check_query = "SELECT id FROM barang WHERE kode_barang = '$kode_barang' AND id != $id";
     $check_result = mysqli_query($koneksi, $check_query);
-
+    
     if (mysqli_num_rows($check_result) > 0) {
         $_SESSION['pesan'] = "Kode barang sudah digunakan!";
-        $_SESSION['tipe']  = "error";
+        $_SESSION['tipe'] = "error";
     } else {
-        $query = "UPDATE barang SET
-                        kode_barang = '$kode_barang',
-                        nama_barang = '$nama_barang',
-                        kategori    = '$kategori',
-                        stok        = '$stok',
-                        harga       = '$harga',
-                        deskripsi   = '$deskripsi',
-                        status      = '$status',
-                        updated_at  = NOW()
-                     WHERE id = $id";
-
+        $query = "UPDATE barang SET 
+                  kode_barang = '$kode_barang',
+                  nama_barang = '$nama_barang',
+                  kategori = '$kategori',
+                  stok = '$stok',
+                  harga = '$harga',
+                  deskripsi = '$deskripsi',
+                  status = '$status',
+                  updated_at = NOW()
+                  WHERE id = $id";
+        
         if (mysqli_query($koneksi, $query)) {
             $_SESSION['pesan'] = "Barang berhasil diperbarui!";
-            $_SESSION['tipe']  = "success";
+            $_SESSION['tipe'] = "success";
             header("Location: index.php?page=data_barang");
             exit();
         } else {
             $_SESSION['pesan'] = "Gagal memperbarui barang: " . mysqli_error($koneksi);
-            $_SESSION['tipe']  = "error";
+            $_SESSION['tipe'] = "error";
         }
     }
 }
@@ -63,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <div class="content-wrapper">
     <?php include 'includes/menu.php'; ?>
-
+    
     <main class="main-content">
         <div class="page-header">
             <h2>Edit Barang</h2>
@@ -75,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <span>Edit Barang</span>
             </div>
         </div>
-
+        
         <div class="content">
             <div class="card">
                 <div class="card-header">
@@ -84,28 +94,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <i class="fas fa-arrow-left"></i> Kembali
                     </a>
                 </div>
-
+                
                 <div class="card-body">
                     <form method="POST" class="form-vertical">
-
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="kode_barang">
                                     <i class="fas fa-barcode"></i> Kode Barang *
                                 </label>
-                                <input type="text" id="kode_barang" name="kode_barang"
+                                <input type="text" id="kode_barang" name="kode_barang" 
                                        value="<?php echo htmlspecialchars($barang['kode_barang']); ?>" required>
                             </div>
-
+                            
                             <div class="form-group">
                                 <label for="nama_barang">
                                     <i class="fas fa-box"></i> Nama Barang *
                                 </label>
-                                <input type="text" id="nama_barang" name="nama_barang"
+                                <input type="text" id="nama_barang" name="nama_barang" 
                                        value="<?php echo htmlspecialchars($barang['nama_barang']); ?>" required>
                             </div>
                         </div>
-
+                        
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="kategori">
@@ -122,24 +131,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <option value="Lainnya" <?php echo $barang['kategori'] == 'Lainnya' ? 'selected' : ''; ?>>Lainnya</option>
                                 </select>
                             </div>
-
+                            
                             <div class="form-group">
                                 <label for="stok">
                                     <i class="fas fa-cubes"></i> Stok *
                                 </label>
-                                <input type="number" id="stok" name="stok"
+                                <input type="number" id="stok" name="stok" 
                                        value="<?php echo $barang['stok']; ?>" min="0" required>
                             </div>
-
+                            
                             <div class="form-group">
                                 <label for="harga">
                                     <i class="fas fa-money-bill-wave"></i> Harga (Rp) *
                                 </label>
-                                <input type="number" id="harga" name="harga"
+                                <input type="number" id="harga" name="harga" 
                                        value="<?php echo $barang['harga']; ?>" min="0" required>
                             </div>
                         </div>
-
+                        
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="status">
@@ -151,24 +160,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 </select>
                             </div>
                         </div>
-
+                        
                         <div class="form-group">
                             <label for="deskripsi">
                                 <i class="fas fa-align-left"></i> Deskripsi
                             </label>
                             <textarea id="deskripsi" name="deskripsi" rows="4"><?php echo htmlspecialchars($barang['deskripsi']); ?></textarea>
                         </div>
-
+                        
                         <div class="form-actions">
                             <button type="reset" class="btn btn-secondary">
                                 <i class="fas fa-redo"></i> Reset
                             </button>
-
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Simpan Perubahan
                             </button>
                         </div>
-
                     </form>
                 </div>
             </div>

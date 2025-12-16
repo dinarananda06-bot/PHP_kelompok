@@ -1,153 +1,148 @@
 <?php
-include 'koneksidb.php';
-$page_title = "Tambah Pegawai";  
+include '../koneksi.php';
 
-function clean_input($data){
-    global $koneksidb;
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    return mysqli_real_escape_string($koneksidb, $data);
+
+if (!function_exists('clean_input')) {
+    function clean_input($data) {
+        global $koneksi;
+        $data = trim($data);
+        $data = stripslashes($data);
+        $data = htmlspecialchars($data);
+        return mysqli_real_escape_string($koneksi, $data);
+    }
 }
 
-// Proses Simpan
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+$page_title = "Tambah Pegawai";
 
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nama_pegawai = clean_input($_POST['nama_pegawai']);
     $jabatan      = clean_input($_POST['jabatan']);
+    $kontak       = clean_input($_POST['kontak']);
     $email        = clean_input($_POST['email']);
+    $gaji         = clean_input($_POST['gaji']);
+    
+    $foto_nama = ""; 
+    
+    if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
+        $target_dir = "../uploads/";
+        
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0755, true);
+        }
 
-    // ===========================
-    //  PROSES UPLOAD FOTO
-    // ===========================
-    $foto_name = $_FILES['foto']['name'];
-    $foto_tmp  = $_FILES['foto']['tmp_name'];
-    $foto_size = $_FILES['foto']['size'];
-
-    // Validasi: wajib pilih foto
-    if ($foto_name == "") {
-        $_SESSION['pesan'] = "Foto wajib diunggah!";
-        $_SESSION['tipe']  = "error";
-        header("Location: index.php?page=tambah_pegawai");
-        exit();
+        $file_name = $_FILES['foto']['name'];
+        $file_tmp  = $_FILES['foto']['tmp_name'];
+        $file_ext  = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+        $allowed_ext = array('jpg', 'jpeg', 'png', 'gif');
+        
+        if (in_array($file_ext, $allowed_ext)) {
+            $foto_nama = time() . "_" . $file_name;
+            $target_file = $target_dir . $foto_nama;
+            
+            if (!move_uploaded_file($file_tmp, $target_file)) {
+                echo "<script>alert('Gagal upload foto');</script>";
+            }
+        } else {
+            echo "<script>alert('Format foto salah!'); window.history.back();</script>";
+            exit();
+        }
     }
 
-    // Validasi: hanya file gambar
-    $allowed_ext = ['jpg','jpeg','png','gif'];
-    $ext = strtolower(pathinfo($foto_name, PATHINFO_EXTENSION));
-
-    if (!in_array($ext, $allowed_ext)) {
-        $_SESSION['pesan'] = "Format foto tidak valid! (jpg, jpeg, png, gif)";
-        $_SESSION['tipe']  = "error";
-        header("Location: index.php?page=tambah_pegawai");
-        exit();
-    }
-
-    // Validasi ukuran
-    if ($foto_size > 2*1024*1024) { // 2 MB
-        $_SESSION['pesan'] = "Ukuran foto maksimal 2MB!";
-        $_SESSION['tipe']  = "error";
-        header("Location: index.php?page=tambah_pegawai");
-        exit();
-    }
-
-    // Nama file aman
-    $folder = "uploads/foto_pegawai/";
-    if (!is_dir($folder)) {
-        mkdir($folder, 0777, true);
-    }
-
-    $new_foto_name = time() . "_" . preg_replace("/[^a-zA-Z0-9\._-]/", "", $foto_name);
-
-    // Upload file
-    if (!move_uploaded_file($foto_tmp, $folder . $new_foto_name)) {
-        $_SESSION['pesan'] = "Gagal upload foto!";
-        $_SESSION['tipe']  = "error";
-        header("Location: index.php?page=tambah_pegawai");
-        exit();
-    }
-
-    // Simpan data
-    $query = "INSERT INTO pegawai (foto, nama_pegawai, jabatan, email) 
-              VALUES ('$new_foto_name', '$nama_pegawai', '$jabatan', '$email')";
-
-    if (mysqli_query($koneksidb, $query)) {
+    // Insert data ke database
+    $query = "INSERT INTO pegawai (foto, nama_pegawai, jabatan, kontak, email, gaji, status) 
+              VALUES ('$foto_nama', '$nama_pegawai', '$jabatan', '$kontak', '$email', '$gaji', 'aktif')";
+    
+    if (mysqli_query($koneksi, $query)) {
+        session_start();
         $_SESSION['pesan'] = "Pegawai berhasil ditambahkan!";
-        $_SESSION['tipe']  = "success";
-        header("Location: index.php?page=data_pegawai");
+        $_SESSION['tipe'] = "success";
+        
+        header("Location: ../index.php?page=data_pegawai"); 
         exit();
-    } 
-    else {
-        $_SESSION['pesan'] = "Gagal menambahkan pegawai: " . mysqli_error($koneksidb);
-        $_SESSION['tipe']  = "error";
+    } else {
+        echo "Error: " . mysqli_error($koneksi);
     }
 }
 ?>
 
-<?php include 'includes/header.php'; ?>
+<?php include '../includes/header.php'; ?>
 
 <div class="content-wrapper">
-    <?php include 'includes/menu.php'; ?>
-
+    
     <main class="main-content">
         <div class="page-header">
-            <h2>Tambah Pegawai</h2>
+            <h2>Tambah Pegawai Baru</h2>
             <div class="breadcrumb">
-                <a href="index.php">Home</a>
+                <a href="../index.php">Home</a>
                 <i class="fas fa-chevron-right"></i>
-                <a href="index.php?page=data_pegawai">Data Pegawai</a>
+                <a href="../index.php?page=data_pegawai">Data Pegawai</a>
                 <i class="fas fa-chevron-right"></i>
                 <span>Tambah Pegawai</span>
             </div>
         </div>
-
+        
         <div class="content">
             <div class="card">
                 <div class="card-header">
                     <h3>Form Tambah Pegawai</h3>
-                    <a href="index.php?page=data_pegawai" class="btn btn-secondary">
+                    <a href="../index.php?page=data_pegawai" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Kembali
                     </a>
                 </div>
-
+                
                 <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data" class="form-vertical">
+                    <form method="POST" class="form-vertical" enctype="multipart/form-data">
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nama Lengkap *</label>
+                                <input type="text" name="nama_pegawai" required class="form-control">
+                            </div>
 
-                        <div class="form-group">
-                            <label><i class="fas fa-image"></i> Foto *</label>
-                            <input type="file" name="foto" required>
+                            <div class="form-group">
+                                <label>Foto Pegawai</label>
+                                <input type="file" name="foto" accept="image/*" class="form-control-file">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Jabatan *</label>
+                                <select name="jabatan" required class="form-control">
+                                    <option value="">Pilih Jabatan</option>
+                                    <option value="Manager">Manager</option>
+                                    <option value="Supervisor">Supervisor</option>
+                                    <option value="Staff Admin">Staff Admin</option>
+                                    <option value="Marketing">Marketing</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Gaji (Rp) *</label>
+                                <input type="number" name="gaji" min="0" required class="form-control">
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label><i class="fas fa-user"></i> Nama Pegawai *</label>
-                            <input type="text" name="nama_pegawai" required>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>No. HP/WA *</label>
+                                <input type="text" name="kontak" required class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" name="email" class="form-control">
+                            </div>
                         </div>
-
-                        <div class="form-group">
-                            <label><i class="fas fa-briefcase"></i> Jabatan *</label>
-                            <input type="text" name="jabatan" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label><i class="fas fa-envelope"></i> Email *</label>
-                            <input type="email" name="email" required>
-                        </div>
-
+                        
                         <div class="form-actions">
-                            <button type="reset" class="btn btn-secondary">
-                                <i class="fas fa-redo"></i> Reset
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Simpan Pegawai
-                            </button>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
                         </div>
-
                     </form>
                 </div>
-
             </div>
         </div>
     </main>
 </div>
 
-<?php include 'includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>
